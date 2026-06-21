@@ -16,29 +16,31 @@ def find_dataset_base_dir():
         # Fallback for local testing if needed
         return "./bn-htrd"
         
-    # Kaggle datasets can have 100k+ files. os.walk() is too slow if it
-    # traverses the wrong folder first. We only check depth 1 and 2.
-    try:
-        slugs = os.listdir(search_path)
-    except FileNotFoundError:
-        return None
-
-    for slug in slugs:
-        slug_path = os.path.join(search_path, slug)
-        if not os.path.isdir(slug_path): continue
-        
-        # Depth 1 check
-        dirs_depth1 = os.listdir(slug_path)
-        if "Recognition_Ground_Truth_Texts" in dirs_depth1 and "Segmentation_Images" in dirs_depth1:
-            return slug_path
+    # Kaggle datasets can be nested in unpredictable ways (e.g. /kaggle/input/datasets/bn-htrd)
+    # We use a fast Breadth-First Search up to depth 4, avoiding massive subdirectories.
+    queue = [(search_path, 0)]
+    max_depth = 4
+    
+    while queue:
+        current_path, depth = queue.pop(0)
+        if depth > max_depth:
+            continue
             
-        # Depth 2 check (sometimes datasets are nested inside a folder of the same name)
-        for sub in dirs_depth1:
-            sub_path = os.path.join(slug_path, sub)
-            if not os.path.isdir(sub_path): continue
-            dirs_depth2 = os.listdir(sub_path)
-            if "Recognition_Ground_Truth_Texts" in dirs_depth2 and "Segmentation_Images" in dirs_depth2:
-                return sub_path
+        try:
+            items = os.listdir(current_path)
+        except (FileNotFoundError, PermissionError):
+            continue
+            
+        if "Recognition_Ground_Truth_Texts" in items and "Segmentation_Images" in items:
+            return current_path
+            
+        # Traverse subdirectories, but skip known large media folders to stay fast
+        for item in items:
+            if item in ["Segmentation_Images", "Lines", "train", "test"]:
+                continue
+            item_path = os.path.join(current_path, item)
+            if os.path.isdir(item_path):
+                queue.append((item_path, depth + 1))
 
     return None
 
