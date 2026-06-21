@@ -13,7 +13,8 @@ import subprocess, sys
 
 packages = [
     "jiwer>=3.0.0",
-    "openpyxl",          # needed by pandas to read .xlsx
+    "openpyxl",              # needed by pandas to read .xlsx
+    "albumentations>=1.3.1", # Suggestion 7: elastic/grid distortion augmentations
 ]
 for pkg in packages:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", pkg])

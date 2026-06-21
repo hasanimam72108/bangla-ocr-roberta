@@ -73,6 +73,16 @@ class Trainer:
         self.use_amp  = config["training"]["mixed_precision"]
         self.scaler   = GradScaler("cuda", enabled=self.use_amp)
 
+        # Label-smoothed loss (Suggestion 6) — computed from logits manually
+        # because VisionEncoderDecoderModel's internal loss does not support
+        # label_smoothing.  We use ignore_index=-100 (the padding sentinel).
+        label_smoothing = config["model"].get("label_smoothing", 0.1)
+        self.criterion = nn.CrossEntropyLoss(
+            label_smoothing=label_smoothing,
+            ignore_index=-100,
+        )
+        print(f"  Label smoothing : {label_smoothing}")
+
         # Early stopping state
         self.best_cer         = float("inf")
         self.patience_counter = 0
@@ -110,9 +120,14 @@ class Trainer:
                     pixel_values=pixel_values,
                     labels=labels,
                 )
-                # VisionEncoderDecoderModel.forward() computes cross-entropy
-                # internally (ignoring -100 labels).
-                loss = outputs.loss / self.accumulate_steps
+                # Use our label-smoothed criterion instead of outputs.loss.
+                # logits shape: (B, seq_len, vocab_size)
+                # labels shape: (B, seq_len)  with -100 at pad positions
+                logits = outputs.logits  # (B, T, V)
+                loss = self.criterion(
+                    logits.reshape(-1, logits.size(-1)),  # (B*T, V)
+                    labels.reshape(-1),                   # (B*T,)
+                ) / self.accumulate_steps
 
             self.scaler.scale(loss).backward()
             step_loss += loss.item()

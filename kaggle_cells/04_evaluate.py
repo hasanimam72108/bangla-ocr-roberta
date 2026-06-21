@@ -1,10 +1,15 @@
 """
 ╔══════════════════════════════════════════════════════════════════════╗
-║  KAGGLE CELL 04 — Evaluation / Inference on saved checkpoint         ║
+║  KAGGLE CELL 04 — Final Quality Evaluation                           ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
-Load best_model.pt and run full CER / WER metrics on the validation set.
-Also shows N decoded sample predictions so you can eyeball quality.
+Run this cell AFTER Cell 03 finishes (or after resuming a session).
+
+This is the ONLY place that uses beam=4 decoding, which gives the real
+accuracy numbers but takes ~15-20 min.  Cell 03 used greedy (beam=1)
+during training to save time; the trained weights are identical either way.
+
+Outputs: CER, WER, exact-match accuracy + N sample GT vs Predicted pairs.
 """
 
 import os, sys
@@ -24,14 +29,14 @@ from src.training.metrics    import evaluate_model
 # ─────────────────────────────────────────────────────────────────────
 # ✏️  Settings
 # ─────────────────────────────────────────────────────────────────────
-ENCODER_NAME = "google/vit-base-patch16-224"
+ENCODER_NAME = "google/vit-base-patch16-384"  # must match what Cell 03 trained
 DECODER_NAME = "xlm-roberta-base"
 CHECKPOINT   = "/kaggle/working/checkpoints/best_model.pt"
 VAL_CSV      = "/kaggle/working/data/val.csv"
 IMG_DIR      = "/kaggle/working/data/train"
-MAX_LENGTH   = 128
-BATCH_SIZE   = 32
-NUM_BEAMS    = 4
+MAX_LENGTH   = 96     # must match Cell 03
+BATCH_SIZE   = 16     # lower batch for beam search (more VRAM per sample)
+NUM_BEAMS    = 4      # ⭐ beam=4 here for real quality numbers (Cell 03 used beam=1)
 PRINT_SAMPLES= 10
 
 # ─────────────────────────────────────────────────────────────────────

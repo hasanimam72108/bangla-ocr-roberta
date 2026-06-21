@@ -1,16 +1,25 @@
 """
 ╔══════════════════════════════════════════════════════════════════════╗
-║  KAGGLE CELL 03 — Training                                           ║
+║  KAGGLE CELL 03 — Training  [Speed-Optimised for ≤6 h on T4/P100]   ║
 ║  Paste this entire script into a Kaggle code cell and run it.        ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
 This cell:
-  1. Loads the XLM-RoBERTa tokenizer and ViT image processor.
-  2. Builds the train/val datasets.
-  3. Instantiates the ViT + XLM-RoBERTa model.
-  4. Runs the Trainer (with phased encoder un-freezing).
+  1. Loads the XLM-RoBERTa tokenizer and ViT-384 image processor.
+  2. Builds the train/val datasets with albumentations augmentation.
+  3. Instantiates the ViT-384 + XLM-RoBERTa model.
+  4. Runs the Trainer with phased encoder un-freezing.
 
-Outputs are written to /kaggle/working/checkpoints/:
+Time budget breakdown (Kaggle T4, ~45 K train / 5 K val):
+  Training  : ~20 min/epoch  (batch=8, accum=4, AMP enabled)
+  Validation : ~2-3 min/epoch (greedy decoding, beam=1)
+  Total/epoch: ~22-23 min
+  Expected   : 15-20 epochs → 5.5-7.5 h (early stopping at patience=8)
+
+For high-quality CER/WER numbers after training, run Cell 04 which
+uses beam=4 decoding.  DO NOT use beam=4 here — it adds 14 min/epoch.
+
+Outputs → /kaggle/working/checkpoints/:
   last_model.pt  — always overwritten (disk-safe)
   best_model.pt  — only written when CER improves
 """
@@ -37,27 +46,31 @@ from src.training.trainer    import Trainer
 # ─────────────────────────────────────────────────────────────────────
 CFG = {
     "model": {
-        "encoder_name":          "google/vit-base-patch16-224",
+        "encoder_name":          "google/vit-base-patch16-384",   # Suggestion 1: 384px ViT
         "decoder_name":          "xlm-roberta-base",
-        "image_size":            224,
-        "max_length":            128,
+        "image_size":            384,
+        "max_length":            96,    # Bengali avg ~40 XLM-R tokens; 96 is safe + faster
         "dropout":               0.1,
-        "label_smoothing":       0.1,
+        "label_smoothing":       0.15,  # Suggestion 6
         "freeze_encoder_epochs": 5,
     },
     "training": {
-        "batch_size":          16,
-        "epochs":              80,
+        "batch_size":          8,    # ViT-384 needs ~2× VRAM vs ViT-224; batch halved
+        "epochs":              25,   # tight budget; expect convergence by epoch 15-20
         "learning_rate":       3e-5,
         "encoder_lr":          5e-6,
         "weight_decay":        0.01,
         "warmup_steps":        300,
         "gradient_clip":       1.0,
         "mixed_precision":     True,
-        "early_stop_patience": 15,
+        "early_stop_patience": 8,    # stop quickly if plateau — saves 2-3 h
         "save_every":          1,
         "log_every":           50,
-        "num_beams":           4,
+        # ⚡ KEY SPEED SETTING: greedy decoding during training validation
+        # This cuts validation from ~18 min/epoch down to ~2 min/epoch.
+        # Real beam=4 quality numbers come from 04_evaluate.py AFTER training.
+        "num_beams":           1,
+        "eval_beams":          4,    # used only in Cell 04
     },
     "data": {
         "train_csv":     "/kaggle/working/data/train.csv",
@@ -65,13 +78,13 @@ CFG = {
         "train_img_dir": "/kaggle/working/data/train",
         "val_img_dir":   "/kaggle/working/data/train",
         "augment":       True,
-        "num_workers":   2,
+        "num_workers":   4,   # increased for faster I/O with albumentations
     },
 }
 
-# Gradient accumulation: set > 1 to simulate a larger effective batch
-# e.g. ACCUM=2 with batch_size=16 → effective batch of 32
-ACCUM_STEPS = 2
+# Gradient accumulation: 8 (batch) × 4 (accum) = effective batch of 32
+# Adjust ACCUM_STEPS down to 2 if you have a 40 GB A100.
+ACCUM_STEPS = 4
 OUTPUT_DIR  = "/kaggle/working/checkpoints"
 RESUME_FROM = None  # set to "/kaggle/working/checkpoints/last_model.pt" to resume
 

@@ -3,34 +3,35 @@
 # ============================================================
 
 model:
-  encoder_name: "google/vit-base-patch16-224"
+  encoder_name: "google/vit-base-patch16-384"
   decoder_name: "xlm-roberta-base"
-  image_size: 224          # ViT-base-patch16-224 native resolution
-  max_length: 128          # max token output length
+  image_size: 384          # ViT-base-patch16-384 native resolution (Suggestion 1)
+  max_length: 96           # Bengali lines avg ~40 XLM-R tokens; 96 is safe upper bound
   dropout: 0.1
-  label_smoothing: 0.1
+  label_smoothing: 0.15   # Suggestion 6: higher smoothing for ambiguous conjuncts
   # Phased un-freezing: start with encoder frozen, then un-freeze after warmup_epochs
   freeze_encoder_epochs: 5  # un-freeze encoder after this many epochs
 
 training:
-  batch_size: 16
-  epochs: 80
+  batch_size: 8            # Reduced for ViT-384 memory budget; use accumulate_steps=4 in 03_train.py
+  epochs: 25              # tight budget: expect convergence by epoch 15-20
   learning_rate: 3.0e-5     # decoder head lr
   encoder_lr: 5.0e-6        # much lower lr when encoder is un-frozen
   weight_decay: 0.01
   warmup_steps: 300
   gradient_clip: 1.0
   mixed_precision: true
-  early_stop_patience: 15
+  early_stop_patience: 8  # stop fast if no improvement — saves 2-3 hours
   save_every: 1             # overwrite last_model.pt every epoch (disk-safe)
   log_every: 50
-  num_beams: 4              # beam search at validation time
+  num_beams: 1             # GREEDY during training validation — beam=4 adds ~14 min/epoch
+  eval_beams: 4            # used only in 04_evaluate.py for final quality evaluation
 
 data:
-  image_size: 224
+  image_size: 384
   augment: true
   train_csv: "/kaggle/working/data/train.csv"
   val_csv: "/kaggle/working/data/val.csv"
   train_img_dir: "/kaggle/working/data/train"
   val_img_dir: "/kaggle/working/data/train"  # images live in same folder
-  num_workers: 2
+  num_workers: 4           # more workers → faster data loading with albumentations
