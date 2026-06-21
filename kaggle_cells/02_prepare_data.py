@@ -8,11 +8,35 @@ from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
 # ─────────────────────────────────────────────────────────────────────
-# ✏️  Adjust these paths to match where Kaggle mounts your dataset
+# ✏️  Auto-discover the dataset path in Kaggle
 # ─────────────────────────────────────────────────────────────────────
-BASE_DIR  = "/kaggle/input/bn-htrd"   # top-level of the BN-HTRd dataset
+def find_dataset_base_dir():
+    search_path = "/kaggle/input"
+    if not os.path.exists(search_path):
+        # Fallback for local testing if needed
+        return "./bn-htrd"
+        
+    for root, dirs, files in os.walk(search_path):
+        if "Recognition_Ground_Truth_Texts" in dirs and "Segmentation_Images" in dirs:
+            return root
+    return None
+
+BASE_DIR = find_dataset_base_dir()
+
+if BASE_DIR is None:
+    # Print available directories to help the user debug
+    inputs = os.listdir("/kaggle/input") if os.path.exists("/kaggle/input") else []
+    raise FileNotFoundError(
+        f"Could not find 'Recognition_Ground_Truth_Texts' in /kaggle/input/.\n"
+        f"Available folders in /kaggle/input/ are: {inputs}\n"
+        f"Please make sure the BN-HTRd dataset is attached to the notebook!"
+    )
+
+print(f"Dataset found at: {BASE_DIR}")
+
 TEXT_DIR  = os.path.join(BASE_DIR, "Recognition_Ground_Truth_Texts")
 LINES_DIR = os.path.join(BASE_DIR, "Segmentation_Images", "Lines")
+
 
 OUT_DIR   = "/kaggle/working/data"
 IMG_DIR   = os.path.join(OUT_DIR, "train")   # all images go here (flat)
