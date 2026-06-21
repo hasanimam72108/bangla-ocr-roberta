@@ -17,9 +17,9 @@ def find_dataset_base_dir():
         return "./bn-htrd"
         
     # Kaggle datasets can be nested in unpredictable ways (e.g. /kaggle/input/datasets/bn-htrd)
-    # We use a fast Breadth-First Search up to depth 4, avoiding massive subdirectories.
+    # We use a fast Breadth-First Search up to depth 5, avoiding massive subdirectories.
     queue = [(search_path, 0)]
-    max_depth = 4
+    max_depth = 5
     
     while queue:
         current_path, depth = queue.pop(0)
