@@ -1,31 +1,4 @@
-"""
-╔══════════════════════════════════════════════════════════════════════╗
-║  KAGGLE CELL 02 — Data Preparation                                   ║
-║  Reads the BN-HTRd .xlsx ground-truth files, groups words into lines,║
-║  copies the corresponding JPG images, and writes train.csv / val.csv.║
-╚══════════════════════════════════════════════════════════════════════╝
-
-PREREQUISITES:
-  • The BN-HTRd dataset must be attached via Kaggle "Add Input".
-  • Adjust BASE_DIR below to match your dataset mount path.
-
-Expected BN-HTRd dataset layout:
-  /kaggle/input/<slug>/
-    ├── Recognition_Ground_Truth_Texts/
-    │   └── <doc_id>/
-    │       └── <doc_id>.xlsx       ← ground truth (Id, Word columns)
-    └── Segmentation_Images/
-        └── Lines/
-            └── <doc_id>/
-                └── <writer_id>/
-                    └── <line_id>.jpg
-
-Output written to:
-  /kaggle/working/data/
-    ├── train/           ← flat folder of copied line JPGs
-    ├── train.csv        ← image filename, text
-    └── val.csv
-"""
+# KAGGLE CELL 02 — Data Preparation
 
 import os
 import glob

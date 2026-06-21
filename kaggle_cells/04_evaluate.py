@@ -1,16 +1,4 @@
-"""
-╔══════════════════════════════════════════════════════════════════════╗
-║  KAGGLE CELL 04 — Final Quality Evaluation                           ║
-╚══════════════════════════════════════════════════════════════════════╝
-
-Run this cell AFTER Cell 03 finishes (or after resuming a session).
-
-This is the ONLY place that uses beam=4 decoding, which gives the real
-accuracy numbers but takes ~15-20 min.  Cell 03 used greedy (beam=1)
-during training to save time; the trained weights are identical either way.
-
-Outputs: CER, WER, exact-match accuracy + N sample GT vs Predicted pairs.
-"""
+# KAGGLE CELL 04 — Final Quality Evaluation
 
 import os, sys
 PROJ = "/kaggle/working/bangla-ocr-roberta"

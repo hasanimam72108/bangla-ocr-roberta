@@ -1,28 +1,4 @@
-"""
-╔══════════════════════════════════════════════════════════════════════╗
-║  KAGGLE CELL 03 — Training  [Speed-Optimised for ≤6 h on T4/P100]   ║
-║  Paste this entire script into a Kaggle code cell and run it.        ║
-╚══════════════════════════════════════════════════════════════════════╝
-
-This cell:
-  1. Loads the XLM-RoBERTa tokenizer and ViT-384 image processor.
-  2. Builds the train/val datasets with albumentations augmentation.
-  3. Instantiates the ViT-384 + XLM-RoBERTa model.
-  4. Runs the Trainer with phased encoder un-freezing.
-
-Time budget breakdown (Kaggle T4, ~45 K train / 5 K val):
-  Training  : ~20 min/epoch  (batch=8, accum=4, AMP enabled)
-  Validation : ~2-3 min/epoch (greedy decoding, beam=1)
-  Total/epoch: ~22-23 min
-  Expected   : 15-20 epochs → 5.5-7.5 h (early stopping at patience=8)
-
-For high-quality CER/WER numbers after training, run Cell 04 which
-uses beam=4 decoding.  DO NOT use beam=4 here — it adds 14 min/epoch.
-
-Outputs → /kaggle/working/checkpoints/:
-  last_model.pt  — always overwritten (disk-safe)
-  best_model.pt  — only written when CER improves
-"""
+# KAGGLE CELL 03 — Training
 
 import os, sys
 

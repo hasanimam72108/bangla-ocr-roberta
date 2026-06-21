@@ -1,12 +1,4 @@
-"""
-╔══════════════════════════════════════════════════════════════════════╗
-║  KAGGLE CELL 01 — Environment Setup                                  ║
-║  Paste the body of this script (inside __name__=='__main__') into    ║
-║  the first code cell of your Kaggle notebook.                        ║
-╚══════════════════════════════════════════════════════════════════════╝
-
-Run once at the start of every Kaggle session.
-"""
+# KAGGLE CELL 01 — Environment Setup
 
 # ── Install extra packages ───────────────────────────────────────────
 import subprocess, sys
