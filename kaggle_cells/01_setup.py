@@ -40,8 +40,11 @@ if not os.path.exists(WORK_DIR):
         print(f"✓ Cloned to {WORK_DIR}")
 else:
     print(f"\n✓ Repository already exists at {WORK_DIR}")
-    # Optional: pull latest changes if you restart the session
-    # subprocess.check_call(["git", "-C", WORK_DIR, "pull"])
+    if os.path.exists(os.path.join(WORK_DIR, ".git")):
+        print("Pulling latest changes from GitHub...")
+        subprocess.check_call(["git", "-C", WORK_DIR, "pull"])
+    else:
+        print("Note: Repository was copied from Kaggle input, not cloned.")
 
 # Add project root to sys.path so imports work
 if WORK_DIR not in sys.path:
