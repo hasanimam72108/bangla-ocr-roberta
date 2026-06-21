@@ -22,15 +22,22 @@ if torch.cuda.is_available():
 # ── Clone / copy project files ───────────────────────────────────────
 import os
 import sys
+import shutil
 import subprocess
 
-GITHUB_REPO_URL = "https://github.com/hasanimam72108/bangla-ocr-roberta.git" # Replace with your actual github url if different
-WORK_DIR        = "/kaggle/working/bangla-ocr-roberta"
+WORK_DIR = "/kaggle/working/bangla-ocr-roberta"
+REPO_INPUT = "/kaggle/input/bangla-ocr-roberta"   # if attached as a Kaggle dataset
 
 if not os.path.exists(WORK_DIR):
-    print(f"\nCloning repository from {GITHUB_REPO_URL}...")
-    subprocess.check_call(["git", "clone", GITHUB_REPO_URL, WORK_DIR])
-    print(f"✓ Cloned to {WORK_DIR}")
+    if os.path.exists(REPO_INPUT):
+        print(f"\nCopying repository from Kaggle input {REPO_INPUT}...")
+        shutil.copytree(REPO_INPUT, WORK_DIR)
+        print(f"✓ Copied to {WORK_DIR}")
+    else:
+        GITHUB_REPO_URL = "https://github.com/hasanimam72108/bangla-ocr-roberta.git"
+        print(f"\nCloning repository from {GITHUB_REPO_URL}...")
+        subprocess.check_call(["git", "clone", GITHUB_REPO_URL, WORK_DIR])
+        print(f"✓ Cloned to {WORK_DIR}")
 else:
     print(f"\n✓ Repository already exists at {WORK_DIR}")
     # Optional: pull latest changes if you restart the session
