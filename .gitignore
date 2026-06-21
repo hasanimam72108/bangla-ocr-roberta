@@ -1,0 +1,29 @@
+# Bangla OCR V2 — ViT + XLM-RoBERTa
+# Bengali handwriting recognition pipeline
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Model checkpoints (large — don't commit)
+checkpoints/
+*.pt
+*.bin
+*.safetensors
+
+# Dataset copies
+/kaggle/
+data/
+
+# Logs
+logs/
+runs/
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

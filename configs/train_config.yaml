@@ -1,0 +1,36 @@
+# ============================================================
+# Bangla OCR V2 — ViT + XLM-RoBERTa Training Configuration
+# ============================================================
+
+model:
+  encoder_name: "google/vit-base-patch16-224"
+  decoder_name: "xlm-roberta-base"
+  image_size: 224          # ViT-base-patch16-224 native resolution
+  max_length: 128          # max token output length
+  dropout: 0.1
+  label_smoothing: 0.1
+  # Phased un-freezing: start with encoder frozen, then un-freeze after warmup_epochs
+  freeze_encoder_epochs: 5  # un-freeze encoder after this many epochs
+
+training:
+  batch_size: 16
+  epochs: 80
+  learning_rate: 3.0e-5     # decoder head lr
+  encoder_lr: 5.0e-6        # much lower lr when encoder is un-frozen
+  weight_decay: 0.01
+  warmup_steps: 300
+  gradient_clip: 1.0
+  mixed_precision: true
+  early_stop_patience: 15
+  save_every: 1             # overwrite last_model.pt every epoch (disk-safe)
+  log_every: 50
+  num_beams: 4              # beam search at validation time
+
+data:
+  image_size: 224
+  augment: true
+  train_csv: "/kaggle/working/data/train.csv"
+  val_csv: "/kaggle/working/data/val.csv"
+  train_img_dir: "/kaggle/working/data/train"
+  val_img_dir: "/kaggle/working/data/train"  # images live in same folder
+  num_workers: 2
