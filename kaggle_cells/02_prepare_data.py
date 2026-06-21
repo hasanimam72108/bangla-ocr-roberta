@@ -16,9 +16,30 @@ def find_dataset_base_dir():
         # Fallback for local testing if needed
         return "./bn-htrd"
         
-    for root, dirs, files in os.walk(search_path):
-        if "Recognition_Ground_Truth_Texts" in dirs and "Segmentation_Images" in dirs:
-            return root
+    # Kaggle datasets can have 100k+ files. os.walk() is too slow if it
+    # traverses the wrong folder first. We only check depth 1 and 2.
+    try:
+        slugs = os.listdir(search_path)
+    except FileNotFoundError:
+        return None
+
+    for slug in slugs:
+        slug_path = os.path.join(search_path, slug)
+        if not os.path.isdir(slug_path): continue
+        
+        # Depth 1 check
+        dirs_depth1 = os.listdir(slug_path)
+        if "Recognition_Ground_Truth_Texts" in dirs_depth1 and "Segmentation_Images" in dirs_depth1:
+            return slug_path
+            
+        # Depth 2 check (sometimes datasets are nested inside a folder of the same name)
+        for sub in dirs_depth1:
+            sub_path = os.path.join(slug_path, sub)
+            if not os.path.isdir(sub_path): continue
+            dirs_depth2 = os.listdir(sub_path)
+            if "Recognition_Ground_Truth_Texts" in dirs_depth2 and "Segmentation_Images" in dirs_depth2:
+                return sub_path
+
     return None
 
 BASE_DIR = find_dataset_base_dir()
