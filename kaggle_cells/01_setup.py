@@ -20,20 +20,23 @@ if torch.cuda.is_available():
     print("VRAM     :", round(torch.cuda.get_device_properties(0).total_memory / 1e9, 1), "GB")
 
 # ── Clone / copy project files ───────────────────────────────────────
-# If you added this repo as a Kaggle dataset, copy it:
-import shutil, os
+import os
+import sys
+import subprocess
 
-REPO_INPUT = "/kaggle/input/bangla-ocr-roberta"   # adjust to your dataset slug
-WORK_DIR   = "/kaggle/working/bangla-ocr-roberta"
+GITHUB_REPO_URL = "https://github.com/hasanimam72108/bangla-ocr-roberta.git" # Replace with your actual github url if different
+WORK_DIR        = "/kaggle/working/bangla-ocr-roberta"
 
-if os.path.exists(REPO_INPUT) and not os.path.exists(WORK_DIR):
-    shutil.copytree(REPO_INPUT, WORK_DIR)
-    print(f"Copied repo to {WORK_DIR}")
-elif not os.path.exists(REPO_INPUT):
-    print("⚠️  Repo dataset not attached — make sure to add it via 'Add Input'.")
+if not os.path.exists(WORK_DIR):
+    print(f"\nCloning repository from {GITHUB_REPO_URL}...")
+    subprocess.check_call(["git", "clone", GITHUB_REPO_URL, WORK_DIR])
+    print(f"✓ Cloned to {WORK_DIR}")
+else:
+    print(f"\n✓ Repository already exists at {WORK_DIR}")
+    # Optional: pull latest changes if you restart the session
+    # subprocess.check_call(["git", "-C", WORK_DIR, "pull"])
 
 # Add project root to sys.path so imports work
-import sys
 if WORK_DIR not in sys.path:
     sys.path.insert(0, WORK_DIR)
 
