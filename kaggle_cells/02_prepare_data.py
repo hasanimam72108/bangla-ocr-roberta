@@ -23,7 +23,7 @@ def find_dataset_base_dir():
             return root
             
         # Modifying 'dirs' in-place tells os.walk NOT to traverse into these
-        for skip_dir in ["Segmentation_Images", "Lines", "train", "test", ".git"]:
+        for skip_dir in ["Segmentation_Images", "Lines", "train", "test", ".git", "Sample_Small"]:
             if skip_dir in dirs:
                 dirs.remove(skip_dir)
 
