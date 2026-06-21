@@ -16,31 +16,16 @@ def find_dataset_base_dir():
         # Fallback for local testing if needed
         return "./bn-htrd"
         
-    # Kaggle datasets can be nested in unpredictable ways (e.g. /kaggle/input/datasets/bn-htrd)
-    # We use a fast Breadth-First Search up to depth 5, avoiding massive subdirectories.
-    queue = [(search_path, 0)]
-    max_depth = 5
-    
-    while queue:
-        current_path, depth = queue.pop(0)
-        if depth > max_depth:
-            continue
+    # We use os.walk but prune massive image directories in-place.
+    # This makes the search blazing fast while working at any depth.
+    for root, dirs, files in os.walk(search_path):
+        if "Recognition_Ground_Truth_Texts" in dirs and "Segmentation_Images" in dirs:
+            return root
             
-        try:
-            items = os.listdir(current_path)
-        except (FileNotFoundError, PermissionError):
-            continue
-            
-        if "Recognition_Ground_Truth_Texts" in items and "Segmentation_Images" in items:
-            return current_path
-            
-        # Traverse subdirectories, but skip known large media folders to stay fast
-        for item in items:
-            if item in ["Segmentation_Images", "Lines", "train", "test"]:
-                continue
-            item_path = os.path.join(current_path, item)
-            if os.path.isdir(item_path):
-                queue.append((item_path, depth + 1))
+        # Modifying 'dirs' in-place tells os.walk NOT to traverse into these
+        for skip_dir in ["Segmentation_Images", "Lines", "train", "test", ".git"]:
+            if skip_dir in dirs:
+                dirs.remove(skip_dir)
 
     return None
 
