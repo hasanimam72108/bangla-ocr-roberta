@@ -87,6 +87,7 @@ python predict.py --image sample.jpg --checkpoint checkpoints/best_model.pt
 
 ---
 
-## Author
+## Authors
 
-- **Jawadur Rafid** ([GitHub: hasanimam72108](https://github.com/hasanimam72108) | [jawadurrafidrafid@gmail.com](mailto:jawadurrafidrafid@gmail.com))
+- **Hasan Imam** ([GitHub: hasanimam72108](https://github.com/hasanimam72108))
+- **Jawadur Rafid** ([jawadurrafidrafid@gmail.com](mailto:jawadurrafidrafid@gmail.com))
