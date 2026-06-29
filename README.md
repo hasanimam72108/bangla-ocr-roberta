@@ -84,3 +84,9 @@ python evaluate.py --checkpoint checkpoints/best_model.pt \
 # Single image
 python predict.py --image sample.jpg --checkpoint checkpoints/best_model.pt
 ```
+
+---
+
+## Author
+
+- **Jawadur Rafid** ([GitHub: hasanimam72108](https://github.com/hasanimam72108) | [jawadurrafidrafid@gmail.com](mailto:jawadurrafidrafid@gmail.com))
